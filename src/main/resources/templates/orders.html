@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Orders - Coffee Shop</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f0eb; }
+        h1 { color: #4a2c2a; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #4a2c2a; font-weight: bold; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #4a2c2a; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background: #f5f0eb; }
+        .status-pending { color: #e67e22; font-weight: bold; }
+        .status-ready { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>&#9749; All Orders</h1>
+    <div class="nav">
+        <a href="/">Home</a>
+        <a href="/orders">Orders</a>
+        <a href="/chat">Chat</a>
+    </div>
+
+    <div class="card">
+        <div th:if="${#lists.isEmpty(orders)}">
+            <p>No orders yet. <a href="/">Place your first order!</a></p>
+        </div>
+        <table th:unless="${#lists.isEmpty(orders)}">
+            <tr>
+                <th>ID</th>
+                <th>Coffee</th>
+                <th>Customer</th>
+                <th>Cost</th>
+                <th>Status</th>
+                <th>Time</th>
+            </tr>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.id}"></td>
+                <td th:text="${order.coffee}"></td>
+                <td th:text="${order.customerName}"></td>
+                <td th:text="'$' + ${order.cost}"></td>
+                <td th:text="${order.status}"
+                    th:class="${order.status == 'READY'} ? 'status-ready' : 'status-pending'"></td>
+                <td th:text="${order.createdAt}"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

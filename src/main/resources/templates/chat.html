@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat - Coffee Shop</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f0eb; }
+        h1 { color: #4a2c2a; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #4a2c2a; font-weight: bold; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #chat-box { height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+        .message { margin: 8px 0; padding: 8px 12px; border-radius: 12px; max-width: 70%; }
+        .message.sent { background: #4a2c2a; color: white; margin-left: auto; text-align: right; }
+        .message.received { background: #e0e0e0; color: #333; }
+        .sender { font-weight: bold; font-size: 0.85em; margin-bottom: 2px; }
+        .timestamp { font-size: 0.75em; opacity: 0.7; }
+        .input-area { display: flex; gap: 10px; }
+        .input-area input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .input-area button { background: #4a2c2a; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .input-area button:hover { background: #6b3f3a; }
+        .status { padding: 5px 10px; border-radius: 4px; margin-bottom: 10px; font-size: 0.9em; }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>&#9749; Chat with Barista</h1>
+    <div class="nav">
+        <a href="/">Home</a>
+        <a href="/orders">Orders</a>
+        <a href="/chat">Chat</a>
+    </div>
+
+    <div class="card">
+        <div id="status" class="status disconnected">Connecting...</div>
+
+        <div id="chat-box">
+            <div th:each="msg : ${messages}" class="message received">
+                <div class="sender" th:text="${msg.sender}"></div>
+                <div th:text="${msg.content}"></div>
+                <div class="timestamp" th:text="${msg.timeStamp}"></div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="sender" placeholder="Your name" value="Customer">
+            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const statusDiv = document.getElementById('status');
+        const wsUrl = 'ws://' + window.location.host + '/chat';
+        let websocket;
+
+        function connect() {
+            websocket = new WebSocket(wsUrl);
+
+            websocket.onopen = function() {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'status connected';
+            };
+
+            websocket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                appendMessage(data.sender, data.content, data.timeStamp);
+            };
+
+            websocket.onclose = function() {
+                statusDiv.textContent = 'Disconnected - Reconnecting...';
+                statusDiv.className = 'status disconnected';
+                setTimeout(connect, 3000);
+            };
+
+            websocket.onerror = function() {
+                statusDiv.textContent = 'Connection error';
+                statusDiv.className = 'status disconnected';
+            };
+        }
+
+        function sendMessage() {
+            const sender = document.getElementById('sender').value;
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+
+            if (content && websocket && websocket.readyState === WebSocket.OPEN) {
+                const msg = { sender: sender, content: content };
+                websocket.send(JSON.stringify(msg));
+                messageInput.value = '';
+            }
+        }
+
+        function appendMessage(sender, content, timestamp) {
+            const div = document.createElement('div');
+            div.className = 'message received';
+            div.innerHTML = '<div class="sender">' + sender + '</div>' +
+                           '<div>' + content + '</div>' +
+                           '<div class="timestamp">' + (timestamp || '') + '</div>';
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        connect();
+    </script>
+</body>
+</html>

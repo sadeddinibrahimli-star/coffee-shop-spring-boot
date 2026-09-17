@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Coffee Shop</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f0eb; }
+        h1 { color: #4a2c2a; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: #4a2c2a; font-weight: bold; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #4a2c2a; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #6b3f3a; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 4px; background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>&#9749; Coffee Shop</h1>
+    <div class="nav">
+        <a href="/">Home</a>
+        <a href="/orders">Orders</a>
+        <a href="/chat">Chat</a>
+    </div>
+
+    <div class="card">
+        <h2>Place an Order</h2>
+        <div th:if="${message}" class="message" th:text="${message}"></div>
+        <form action="/order" method="post">
+            <label>Your Name:</label><br>
+            <input type="text" name="customerName" required placeholder="Enter your name"><br><br>
+            <label>Coffee Type:</label><br>
+            <select name="coffeeType">
+                <option value="ESPRESSO">Espresso - $1.99</option>
+                <option value="CAPPUCCINO">Cappuccino - $2.99</option>
+                <option value="LATTE">Latte - $3.49</option>
+            </select><br><br>
+            <button type="submit">Place Order</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Recent Orders</h2>
+        <table th:if="${orders}" style="width:100%; border-collapse: collapse;">
+            <tr style="background: #4a2c2a; color: white;">
+                <th style="padding: 8px;">ID</th>
+                <th style="padding: 8px;">Coffee</th>
+                <th style="padding: 8px;">Customer</th>
+                <th style="padding: 8px;">Cost</th>
+                <th style="padding: 8px;">Status</th>
+            </tr>
+            <tr th:each="order : ${orders}" style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px;" th:text="${order.id}"></td>
+                <td style="padding: 8px;" th:text="${order.coffee}"></td>
+                <td style="padding: 8px;" th:text="${order.customerName}"></td>
+                <td style="padding: 8px;" th:text="'$' + ${order.cost}"></td>
+                <td style="padding: 8px;" th:text="${order.status}"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
